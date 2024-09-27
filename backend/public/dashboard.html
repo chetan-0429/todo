@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>dashboard</h1>
+
+    <script>
+          function fetchData(){
+         fetch('http://localhost:3000/try',{
+            method:"GET",
+            credentials:"include"
+         })
+         .then(res => {
+            console.log(res);
+            if(!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+            else return res.json()})
+            .then(data=>{
+                console.log(data);
+                if(data.success) {
+                    console.log(data.message);
+                }
+                else{
+                    console.log('not loged in',data.message)
+                }
+                
+         })
+         .catch(err=>{
+             console.log('error ',err)
+         })
+        }
+        fetchData();
+    </script>
+</body>
+</html>

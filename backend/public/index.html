@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1> To-Do app</h1>
+    <div>
+        <div>
+           <input type="text" id="task">
+          <button id="btn">Add</button>
+        </div>
+        <div>
+            <div id="show"></div>
+        </div>
+    </div>
+    <script>
+        
+        function fetchData(){
+         fetch('http://localhost:3000/show',{
+            method:"GET",
+            credentials:"include"
+         })
+         .then(res => {
+            console.log(res);
+            if(!res.ok) {
+                throw new Error('Network response was not ok');
+            }
+            else return res.json()})
+            .then(data=>{
+                console.log('kkk')
+                console.log(data);
+                if(data.success)
+                showList(data.tasks)
+            else{
+                window.location = '/frontend/login.html';
+            }
+         })
+         .catch(err=>{
+             console.log('error ',err)
+         })
+        }
+        fetchData();
+
+        function showList(list){
+        list.forEach((task)=>{ 
+            addTask(task.description,task._id)
+        })
+       }
+
+       const btn = document.getElementById('btn');
+       btn.addEventListener('click',(e)=>{
+        e.preventDefault()
+        console.log('clicked')
+           const task =  document.getElementById('task');
+           console.log(task.value)
+           fetch('http://localhost:3000/add',{
+            method:"POST",
+            headers:{"content-type" : "application/json"},
+            body:JSON.stringify({description:task.value}),
+           })
+           .then((res) => res.json())
+           .then(res =>{
+            console.log('res',res);
+            addTask(task.value,res.task._id);
+            task.value=''
+           })
+           .catch(err => {
+            console.log('error in sending',err);
+           })
+       })
+
+        function addTask(task,id){
+            const main = document.getElementById('show');
+            const div = document.createElement('div');
+            div.setAttribute('id',id)
+           const editBtn = document.createElement('button');
+           editBtn.textContent = 'edit';
+           editBtn.addEventListener('click',()=>{editTask(id,task)})
+
+           const deleteBtn = document.createElement('button');
+           deleteBtn.addEventListener('click',()=>{deleteTask(id)})
+           deleteBtn.textContent = 'delete';
+           const para = document.createElement('list');
+           para.textContent = task;
+           div.appendChild(para);
+           div.appendChild(editBtn);
+           div.appendChild(deleteBtn);
+           console.log(div)
+           main.appendChild(div);
+        }
+
+       function deleteTask(id){
+        console.log(id)
+        fetch(`http://localhost:3000/delete/${id}`)
+        .then(res => res.json())
+        .then(res => {
+            console.log(res);
+            removeFromFrontend(id);
+        })
+        .catch(err =>{
+            console.log('error ',err);
+        })
+
+       }
+       function removeFromFrontend(id){
+           const main = document.getElementById('show')
+           const ele = document.getElementById(id);
+            main.removeChild(ele)
+       }
+
+       function editTask(id,task){
+        const div =document.getElementById(id);
+        console.log(div.list)  //note: ${task} here is wrong should be "${task}"
+        div.innerHTML = ` <input value="${task}"/>  
+                         <button id="save" onClick="saveChanges(event,'${id}')">save</button>`
+                         console.log(div)
+ 
+       }
+       function saveChanges(e,id){
+        console.log('clicked')
+        const input = e.target.parentNode.children[0];
+        console.log('input: ',input)
+        console.log('id: ',id)
+        const description = input.value;
+       fetch('http://localhost:3000/edit',{
+            method:"post",
+            headers:{'content-type':'application/json'},
+            body:JSON.stringify({id,description})
+        })
+        .then(res=> res.json())
+        .then(res => {
+            savedInFrontedn(id,description)
+        })
+        .catch(err => {
+            console.log('error in edit',err)
+        })
+
+        }
+        function savedInFrontedn(id,task){
+            const div = document.getElementById(id);
+            div.innerHTML = '';
+           const editBtn = document.createElement('button');
+           editBtn.textContent = 'edit';
+           editBtn.addEventListener('click',()=>{editTask(id,task)})
+
+           const deleteBtn = document.createElement('button');
+           deleteBtn.addEventListener('click',()=>{deleteTask(id)})
+           deleteBtn.textContent = 'delete';
+           const para = document.createElement('list');
+           para.textContent = task;
+           div.appendChild(para);
+           div.appendChild(editBtn);
+           div.appendChild(deleteBtn);
+           console.log('saved in front ',div)
+        }
+       
+    </script>
+</body>
+
+</html>

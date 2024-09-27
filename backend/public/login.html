@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>Login Page</div>
+       <div>
+      Username<input type="text" id="username">
+       </div>
+       <div>
+      Password<input type="text" id="password">
+       </div>
+       <div>
+        <button id="btn">submit</button>
+       </div>
+    <script>
+        const btn = document.getElementById('btn');
+
+        btn.addEventListener('click',()=>{
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            fetch('http://localhost:3000/login',{
+                method:'post',
+                headers:{'content-type':'application/json'},
+                body:JSON.stringify({username,password})
+            })
+            .then(res => res.json())
+            .then(res =>{
+                console.log(res);
+                if(res.success){
+                    alert('login success');
+                    window.location = '/index.html';
+                }
+            })
+            .catch(err => {
+                console.log('error in login',err);
+            })
+        })
+    </script>
+</body>
+</html>
